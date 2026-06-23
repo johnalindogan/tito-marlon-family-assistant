@@ -9,6 +9,14 @@ client = TestClient(app)
 
 @pytest.fixture(autouse=True)
 def mock_ai(monkeypatch: pytest.MonkeyPatch) -> None:
+    class NoDatabaseSession:
+        def __enter__(self):
+            return None
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            return False
+
+    monkeypatch.setattr("app.service.database.session_scope", lambda: NoDatabaseSession())
     monkeypatch.setattr("app.service.extract_memories", lambda message: [])
     monkeypatch.setattr(
         "app.service.generate_reply",

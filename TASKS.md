@@ -41,6 +41,15 @@
 - [ ] Keep Facebook Send API node
 - [ ] Test Messenger E2E
 
+## Local Verification
+
+- [x] Commit and push backend skeleton
+- [x] Configure local OpenAI API key in ignored `.env`
+- [x] Start local PostgreSQL with Docker
+- [x] Apply database schema
+- [x] Verify SQLAlchemy database connection
+- [x] Verify OpenAI + PostgreSQL smoke test
+
 ## Phase F — Safety
 
 - [x] Never log secrets

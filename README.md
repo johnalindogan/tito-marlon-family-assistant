@@ -149,6 +149,17 @@ Install dependencies:
 python -m pip install -r requirements.txt
 ```
 
+Start local PostgreSQL:
+
+```bash
+python scripts/setup_local_env.py
+docker compose -f docker-compose.postgres.yml up -d
+docker cp DATABASE_SCHEMA.sql titomarlon-postgres:/tmp/DATABASE_SCHEMA.sql
+docker exec titomarlon-postgres psql -U titomarlon -d titomarlon -f /tmp/DATABASE_SCHEMA.sql
+python scripts/reset_local_postgres_password.py
+python scripts/database_smoke_test.py
+```
+
 Run the API:
 
 ```bash
@@ -167,6 +178,12 @@ Send a test message:
 python scripts/smoke_test.py
 ```
 
+Run an explicit OpenAI-backed smoke test:
+
+```bash
+python scripts/openai_smoke_test.py
+```
+
 Current backend status:
 
 - `/health` is available.
@@ -174,3 +191,5 @@ Current backend status:
 - `/message` saves user and assistant chat rows when `DATABASE_URL` is configured and the schema exists.
 - `/message` extracts memories and generates replies with OpenAI when `OPENAI_API_KEY` is configured.
 - `/message` returns a safe fallback reply when OpenAI is not configured or fails.
+
+Local PostgreSQL uses host port `55432` to avoid conflicts with other Postgres installations on the default `5432` port.
