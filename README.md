@@ -134,3 +134,43 @@ http://host.docker.internal:8000/message
 ```
 
 Later optionally expose via Cloudflare only if needed.
+
+## Backend Quick Start
+
+Create a local environment file:
+
+```bash
+copy .env.example .env
+```
+
+Install dependencies:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Run the API:
+
+```bash
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Check health:
+
+```bash
+curl http://localhost:8000/health
+```
+
+Send a test message:
+
+```bash
+python scripts/smoke_test.py
+```
+
+Current backend status:
+
+- `/health` is available.
+- `/message` validates requests.
+- `/message` saves user and assistant chat rows when `DATABASE_URL` is configured and the schema exists.
+- `/message` extracts memories and generates replies with OpenAI when `OPENAI_API_KEY` is configured.
+- `/message` returns a safe fallback reply when OpenAI is not configured or fails.
