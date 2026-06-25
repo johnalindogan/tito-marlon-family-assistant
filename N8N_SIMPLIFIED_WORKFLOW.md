@@ -96,6 +96,22 @@ Body:
 }
 ```
 
+## Outbound Image Reply Node
+
+The image branch runs after the text reply node, so do not use `$json.outbound_image_urls`
+there. At that point `$json` is the Facebook Send API response. Use an explicit backend
+node reference instead:
+
+```javascript
+{{ $('Tito Marlon Backend').item.json.outbound_image_urls }}
+```
+
+The outbound image condition should check:
+
+```javascript
+{{ String(($('Tito Marlon Backend').item.json.outbound_image_urls || []).length > 0) }}
+```
+
 ## Important
 
 The Facebook Page Access Token must stay in n8n credentials or environment variables, not in GitHub.
