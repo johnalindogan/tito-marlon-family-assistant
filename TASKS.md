@@ -81,3 +81,14 @@
 - [x] Auto-link exact family name matches
 - [x] Personalize non-family contacts with first name only
 - [x] Document n8n Meta profile lookup payload
+
+## Phase J — Good Family Assistant Media Launch
+
+- [x] Add parent-device media catalog for Canon G3010, PLDT, phones, laptop, apps, Cignal, and Smart Band 8
+- [x] Add media planner for curated visuals, official links, safe generated diagrams, and escalation triggers
+- [x] Extend `/message` with `outbound_media` and `escalation_request`
+- [x] Preserve current `outbound_image_urls` for n8n Messenger image nodes
+- [x] Add optional OpenAI image generation and Cloudflare R2 upload integration points
+- [ ] Configure Cloudflare R2 credentials and public media base URL
+- [ ] Add n8n John notification path for `escalation_request`
+- [ ] Run 10-15 scripted parent-demo scenarios end-to-end in Messenger

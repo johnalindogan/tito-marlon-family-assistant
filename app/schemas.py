@@ -89,10 +89,27 @@ class FamilyMemberProfile(BaseModel):
     facebook_url: str
 
 
+class OutboundMedia(BaseModel):
+    type: str
+    url: str
+    title: str
+    caption: str = ""
+    source: str = ""
+
+
+class EscalationRequest(BaseModel):
+    reason: str
+    summary: str
+    urgency: str
+    suggested_action: str
+
+
 class MessageResponse(BaseModel):
     reply: str
     memories_saved: list[MemorySaved] = []
     outbound_image_urls: list[str] = []
+    outbound_media: list[OutboundMedia] = []
+    escalation_request: EscalationRequest | None = None
     identified_family_member: FamilyMemberProfile | None = None
     messenger_contact: MessengerContactProfile | None = None
 

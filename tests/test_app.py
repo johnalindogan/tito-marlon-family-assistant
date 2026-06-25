@@ -161,6 +161,79 @@ def test_family_picture_request_returns_outbound_images() -> None:
     assert all(url.startswith("https://") for url in body["outbound_image_urls"])
 
 
+def test_media_catalog_has_good_assistant_launch_scale() -> None:
+    from app.media import MEDIA_CATALOG
+
+    assert 150 <= len(MEDIA_CATALOG) <= 300
+
+
+@pytest.mark.parametrize(
+    ("message", "expected_intent"),
+    [
+        ("Paano mag refill ng ink sa Canon G3010?", "printer"),
+        ("Walang wifi ang PLDT router", "wifi"),
+        ("How to screenshot sa Samsung A16?", "phone"),
+        ("Hindi naglo-load browser sa Asus laptop", "laptop"),
+        ("Paano buksan YouTube sa Cignal TV?", "apps"),
+        ("Ayaw mag sync ng Xiaomi Smart Band 8", "wearable"),
+    ],
+)
+def test_media_intent_classification_for_parent_devices(
+    message: str,
+    expected_intent: str,
+) -> None:
+    from app.media import plan_media_for_message
+
+    plan = plan_media_for_message(message)
+
+    assert plan.intent == expected_intent
+    assert plan.assets
+
+
+def test_generated_diagram_fallback_is_for_safe_generic_visuals() -> None:
+    from app.media import plan_media_for_message
+
+    generic_plan = plan_media_for_message("Show me a simple diagram of what a USB cable looks like")
+    exact_device_plan = plan_media_for_message("Show me exact Canon G3010 ink tank internals")
+
+    assert generic_plan.generated_prompt is not None
+    assert exact_device_plan.generated_prompt is None
+
+
+def test_message_returns_outbound_media_contract() -> None:
+    response = client.post(
+        "/message",
+        json={
+            "sender_id": "sender-1",
+            "message": "Paano mag refill ng ink sa Canon G3010?",
+        },
+    )
+
+    body = response.json()
+
+    assert response.status_code == 200
+    assert body["outbound_media"]
+    assert {"type", "url", "title", "caption", "source"} <= set(body["outbound_media"][0])
+    assert body["outbound_image_urls"]
+    assert "Useful link:" in body["reply"]
+
+
+def test_escalation_triggers_for_risky_or_frustrated_troubleshooting() -> None:
+    response = client.post(
+        "/message",
+        json={
+            "sender_id": "sender-1",
+            "message": "Ayaw gumana at may password reset sa router admin",
+        },
+    )
+
+    body = response.json()
+
+    assert response.status_code == 200
+    assert body["escalation_request"]["reason"] == "risky_troubleshooting"
+    assert "John" in body["reply"]
+
+
 def test_family_member_context_formatting() -> None:
     from app.ai import _format_family_member
 
