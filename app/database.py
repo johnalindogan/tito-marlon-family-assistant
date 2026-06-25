@@ -1,5 +1,6 @@
 from collections.abc import Generator
 from contextlib import contextmanager
+import json
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
@@ -79,6 +80,44 @@ def load_memory(session: Session, sender_id: str) -> dict[str, str]:
     ).mappings()
 
     return {row["memory_key"]: row["memory_value"] for row in rows}
+
+
+def load_family_member_by_sender_id(session: Session, sender_id: str) -> dict[str, object] | None:
+    row = session.execute(
+        text(
+            """
+            SELECT member_key, full_name, preferred_name, relationship_label, aliases_json, facebook_url
+            FROM family_members
+            WHERE messenger_sender_id = :sender_id
+            """
+        ),
+        {"sender_id": sender_id},
+    ).mappings().first()
+
+    if row is None:
+        return None
+
+    return {
+        "member_key": row["member_key"],
+        "full_name": row["full_name"],
+        "preferred_name": row["preferred_name"],
+        "relationship_label": row["relationship_label"],
+        "aliases": json.loads(row["aliases_json"]),
+        "facebook_url": row["facebook_url"],
+    }
+
+
+def link_family_member_sender(session: Session, member_key: str, sender_id: str) -> None:
+    session.execute(
+        text(
+            """
+            UPDATE family_members
+            SET messenger_sender_id = :sender_id, updated_at = now()
+            WHERE member_key = :member_key
+            """
+        ),
+        {"member_key": member_key, "sender_id": sender_id},
+    )
 
 
 def upsert_memory(session: Session, sender_id: str, memory_key: str, memory_value: str) -> None:

@@ -34,9 +34,20 @@ Response:
 ```json
 {
   "reply": "Paborito mong pagkain ay Sinigang.",
-  "memories_saved": []
+  "memories_saved": [],
+  "outbound_image_urls": [],
+  "identified_family_member": {
+    "member_key": "nelon_alindogan",
+    "full_name": "Nelon Alindogan",
+    "preferred_name": "Papa Nelon",
+    "relationship_label": "Papa Nelon / Grandpa Nelon",
+    "aliases": ["Papa Nelon", "Grandpa Nelon", "Granpa Nelon", "Nelon"],
+    "facebook_url": "https://www.facebook.com/leaderalindogan"
+  }
 }
 ```
+
+`identified_family_member` is `null` until the Messenger `sender_id` has been linked to a seeded family member.
 
 ## Error Handling
 

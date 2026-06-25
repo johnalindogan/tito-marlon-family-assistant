@@ -23,6 +23,7 @@ The following are already working:
 - PostgreSQL container running
 - `chat_messages` table exists
 - `family_memory` table exists
+- `family_members` table exists with initial Alindogan family member profiles
 - Permanent memory can be manually inserted and read
 
 ## Current Pain Point
@@ -193,6 +194,31 @@ Current backend status:
 - `/message` saves user and assistant chat rows when `DATABASE_URL` is configured and the schema exists.
 - `/message` extracts memories and generates replies with OpenAI when `OPENAI_API_KEY` is configured.
 - `/message` can download image URLs and pass them to OpenAI for visual understanding.
+- `/message` identifies linked family members by Messenger sender ID and customizes replies with their preferred family name.
 - `/message` returns a safe fallback reply when OpenAI is not configured or fails.
+
+## Family Member Identity
+
+Messenger sends a page-scoped `sender_id`, not the public Facebook profile URL. The initial family profile list is seeded in the database, then each real Messenger sender ID should be linked once after that person messages the page.
+
+List recent Messenger sender IDs:
+
+```bash
+python scripts/list_recent_senders.py
+```
+
+Link a sender ID to a family profile:
+
+```bash
+python scripts/link_family_member.py nelon_alindogan <MESSENGER_SENDER_ID>
+```
+
+Seeded `member_key` values:
+
+- `nelon_alindogan`
+- `corazon_alindogan`
+- `mary_grace_alindogan`
+- `joseph_noel_alindogan`
+- `james_nelson_alindogan`
 
 Local PostgreSQL uses host port `55432` to avoid conflicts with other Postgres installations on the default `5432` port.

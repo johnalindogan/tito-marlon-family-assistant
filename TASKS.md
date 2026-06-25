@@ -65,3 +65,11 @@
 - [x] Convert reachable image URLs to data URLs before calling OpenAI
 - [x] Keep raw image URLs out of chat history rows
 - [x] Add tests for image payload validation and OpenAI image content shape
+
+## Phase H — Family Identity
+
+- [x] Seed initial family member registry
+- [x] Add Messenger sender ID linking support
+- [x] Include identified family profile in AI context
+- [x] Return identified family member metadata from `/message`
+- [x] Add scripts to list recent sender IDs and link family members

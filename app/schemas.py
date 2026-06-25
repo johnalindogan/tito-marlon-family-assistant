@@ -54,9 +54,20 @@ class MemorySaved(BaseModel):
     memory_value: str
 
 
+class FamilyMemberProfile(BaseModel):
+    member_key: str
+    full_name: str
+    preferred_name: str
+    relationship_label: str
+    aliases: list[str] = []
+    facebook_url: str
+
+
 class MessageResponse(BaseModel):
     reply: str
     memories_saved: list[MemorySaved] = []
+    outbound_image_urls: list[str] = []
+    identified_family_member: FamilyMemberProfile | None = None
 
 
 class HealthResponse(BaseModel):

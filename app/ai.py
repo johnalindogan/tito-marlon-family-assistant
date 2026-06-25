@@ -52,6 +52,7 @@ def generate_reply(
     sender_id: str,
     message: str,
     image_urls: list[str],
+    family_member: dict[str, object] | None,
     recent_chat: list[dict[str, str]],
     memory: dict[str, str],
 ) -> str:
@@ -62,6 +63,7 @@ def generate_reply(
     settings = get_settings()
     context = (
         f"Messenger sender_id: {sender_id}\n\n"
+        f"Identified family member:\n{_format_family_member(family_member)}\n\n"
         f"Saved family memory:\n{format_memory(memory)}"
     )
 
@@ -117,6 +119,22 @@ def _chat_history_messages(recent_chat: list[dict[str, str]]) -> list[dict[str, 
         if content:
             messages.append({"role": role, "content": content})
     return messages[-20:]
+
+
+def _format_family_member(family_member: dict[str, object] | None) -> str:
+    if family_member is None:
+        return "Unknown Messenger sender. Be helpful, but do not assume which family member this is."
+
+    aliases = family_member.get("aliases") or []
+    aliases_text = ", ".join(str(alias) for alias in aliases) if aliases else "None"
+    return (
+        f"- member_key: {family_member['member_key']}\n"
+        f"- full_name: {family_member['full_name']}\n"
+        f"- preferred_name: {family_member['preferred_name']}\n"
+        f"- relationship_label: {family_member['relationship_label']}\n"
+        f"- aliases: {aliases_text}\n"
+        "Use the preferred name naturally when it fits. Do not ask this person who they are."
+    )
 
 
 def _user_content(message: str, image_urls: list[str]) -> str | list[dict[str, Any]]:
