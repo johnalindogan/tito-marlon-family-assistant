@@ -27,8 +27,6 @@ IF not echo
 HTTP Request: POST Tito Marlon Backend /message
   ↓
 HTTP Request: Facebook Graph API /me/messages
-  ↓
-Respond to Webhook
 ```
 
 ## IF Condition
@@ -72,14 +70,26 @@ Body:
 }
 ```
 
-Current n8n raw JSON body:
+Current n8n raw JSON body must be one expression that serializes the full object.
+Do not put `{{ ... }}` inside quoted JSON string values for user text or AI replies;
+quotes and newlines can make the node fail with "JSON Body is not valid JSON".
 
 ```javascript
-={
-  "sender_id": "{{ $('Webhook').item.json.body.entry[0].messaging[0].sender.id }}",
-  "message": "{{ $('Webhook').item.json.body.entry[0].messaging[0].message.text || '' }}",
-  "image_urls": {{ JSON.stringify(($('Webhook').item.json.body.entry[0].messaging[0].message.attachments || []).filter(attachment => attachment.type === 'image' && attachment.payload && attachment.payload.url).map(attachment => attachment.payload.url).slice(0, 3)) }}
-}
+={{ JSON.stringify({
+  sender_id: $('Webhook').item.json.body.entry[0].messaging[0].sender.id,
+  message: $('Webhook').item.json.body.entry[0].messaging[0].message?.text || '',
+  image_urls: (($('Webhook').item.json.body.entry[0].messaging[0].message?.attachments || [])
+    .filter(attachment => attachment.type === 'image' && attachment.payload && attachment.payload.url)
+    .map(attachment => attachment.payload.url)
+    .slice(0, 3)),
+  messenger_profile: $json.first_name ? {
+    first_name: $json.first_name || '',
+    last_name: $json.last_name || '',
+    profile_pic: $json.profile_pic || '',
+    locale: $json.locale || '',
+    timezone: $json.timezone ?? null
+  } : null
+}) }}
 ```
 
 ## Facebook Reply Node
@@ -96,15 +106,15 @@ Headers:
 
 Body:
 
-```json
-{
-  "recipient": {
-    "id": "{{ $('Webhook').item.json.body.entry[0].messaging[0].sender.id }}"
+```javascript
+={{ JSON.stringify({
+  recipient: {
+    id: $('Webhook').item.json.body.entry[0].messaging[0].sender.id
   },
-  "message": {
-    "text": "{{ $json.reply }}"
+  message: {
+    text: $json.reply || 'Pasensya po, may technical issue ako ngayon. Pakisubukan po ulit.'
   }
-}
+}) }}
 ```
 
 ## Outbound Image Reply Node
@@ -123,23 +133,24 @@ The outbound image condition should check:
 {{ String(($('Tito Marlon Backend').item.json.outbound_image_urls || []).length > 0) }}
 ```
 
-Send each outbound image as a real Messenger image attachment, not as a generic card:
+Send each outbound image as a real Messenger image attachment, not as a generic card.
+Use the same JSON-safe expression pattern:
 
-```json
-{
-  "recipient": {
-    "id": "{{ $('Webhook').item.json.body.entry[0].messaging[0].sender.id }}"
+```javascript
+={{ JSON.stringify({
+  recipient: {
+    id: $('Webhook').item.json.body.entry[0].messaging[0].sender.id
   },
-  "message": {
-    "attachment": {
-      "type": "image",
-      "payload": {
-        "url": "{{ $('Tito Marlon Backend').item.json.outbound_image_urls[0] }}",
-        "is_reusable": true
+  message: {
+    attachment: {
+      type: 'image',
+      payload: {
+        url: $('Tito Marlon Backend').item.json.outbound_image_urls[0],
+        is_reusable: true
       }
     }
   }
-}
+}) }}
 ```
 
 ## Important
