@@ -129,6 +129,38 @@ def test_running_photo_request_returns_outbound_images() -> None:
     assert all(url.startswith("https://") for url in body["outbound_image_urls"])
 
 
+def test_general_picture_request_returns_outbound_images() -> None:
+    response = client.post(
+        "/message",
+        json={
+            "sender_id": "sender-1",
+            "message": "Send me any picture",
+        },
+    )
+
+    body = response.json()
+
+    assert response.status_code == 200
+    assert len(body["outbound_image_urls"]) == 3
+    assert "makapag-send" not in body["reply"].lower()
+
+
+def test_family_picture_request_returns_outbound_images() -> None:
+    response = client.post(
+        "/message",
+        json={
+            "sender_id": "sender-1",
+            "message": "Send me image of happy filipino family",
+        },
+    )
+
+    body = response.json()
+
+    assert response.status_code == 200
+    assert len(body["outbound_image_urls"]) == 3
+    assert all(url.startswith("https://") for url in body["outbound_image_urls"])
+
+
 def test_family_member_context_formatting() -> None:
     from app.ai import _format_family_member
 
