@@ -21,9 +21,13 @@ Request:
 ```json
 {
   "sender_id": "26741790695498132",
-  "message": "Ano ang paborito kong pagkain?"
+  "message": "Ano ang paborito kong pagkain?",
+  "image_urls": []
 }
 ```
+
+`message` may be blank when `image_urls` contains at least one image URL. The
+backend accepts up to 3 image URLs per request.
 
 Response:
 
@@ -38,8 +42,9 @@ Response:
 
 Return `400` if:
 - `sender_id` missing
-- `message` missing
-- `message` not text
+- both `message` and `image_urls` are missing or blank
+- `message` is not text
+- an image URL is not `http` or `https`
 
 Return `500` for server/internal errors.
 

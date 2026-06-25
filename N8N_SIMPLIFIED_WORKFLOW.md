@@ -56,7 +56,18 @@ Body:
 ```json
 {
   "sender_id": "{{ $json.body.entry[0].messaging[0].sender.id }}",
-  "message": "{{ $json.body.entry[0].messaging[0].message.text }}"
+  "message": "{{ $json.body.entry[0].messaging[0].message.text || '' }}",
+  "image_urls": "{{ image attachment payload URLs, max 3 }}"
+}
+```
+
+Current n8n raw JSON body:
+
+```javascript
+={
+  "sender_id": "{{ $('Webhook').item.json.body.entry[0].messaging[0].sender.id }}",
+  "message": "{{ $('Webhook').item.json.body.entry[0].messaging[0].message.text || '' }}",
+  "image_urls": {{ JSON.stringify(($('Webhook').item.json.body.entry[0].messaging[0].message.attachments || []).filter(attachment => attachment.type === 'image' && attachment.payload && attachment.payload.url).map(attachment => attachment.payload.url).slice(0, 3)) }}
 }
 ```
 

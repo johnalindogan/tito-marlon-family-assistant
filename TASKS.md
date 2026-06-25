@@ -57,3 +57,11 @@
 - [x] Add max message length
 - [x] Add fallback reply if OpenAI fails
 - [x] Add scam/OTP safety instruction in system prompt
+
+## Phase G — Messenger Images
+
+- [x] Accept optional image URLs in `/message`
+- [x] Forward Messenger image attachment URLs from n8n
+- [x] Convert reachable image URLs to data URLs before calling OpenAI
+- [x] Keep raw image URLs out of chat history rows
+- [x] Add tests for image payload validation and OpenAI image content shape

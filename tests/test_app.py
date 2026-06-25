@@ -20,7 +20,7 @@ def mock_ai(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("app.service.extract_memories", lambda message: [])
     monkeypatch.setattr(
         "app.service.generate_reply",
-        lambda sender_id, message, recent_chat, memory: (
+        lambda sender_id, message, image_urls, recent_chat, memory: (
             "Hi, ako si Tito Marlon. Naka-receive ako ng message mo. "
             "Inaayos pa ang full AI memory ko, pero nandito ako para tumulong."
         ),
@@ -54,3 +54,38 @@ def test_message_rejects_blank_text() -> None:
     )
 
     assert response.status_code == 422
+
+
+def test_message_accepts_image_without_text() -> None:
+    response = client.post(
+        "/message",
+        json={
+            "sender_id": "sender-1",
+            "image_urls": ["https://example.com/photo.jpg"],
+        },
+    )
+
+    assert response.status_code == 200
+    assert "reply" in response.json()
+
+
+def test_system_prompt_allows_photos() -> None:
+    from app.prompts import SYSTEM_PROMPT
+
+    assert "Photos are allowed" in SYSTEM_PROMPT
+    assert "Do not claim photos are forbidden" in SYSTEM_PROMPT
+
+
+def test_user_content_includes_image_urls(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app import ai
+
+    monkeypatch.setattr(ai, "_download_image_data_url", lambda image_url: None)
+
+    content = ai._user_content("Ano ito?", ["https://example.com/photo.jpg"])
+
+    assert isinstance(content, list)
+    assert content[0] == {"type": "text", "text": "Ano ito?"}
+    assert content[1] == {
+        "type": "image_url",
+        "image_url": {"url": "https://example.com/photo.jpg"},
+    }

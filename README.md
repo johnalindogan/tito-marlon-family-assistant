@@ -19,6 +19,7 @@ The following are already working:
 - Messenger → Meta → Cloudflare → n8n webhook working
 - n8n → OpenAI working
 - n8n → Facebook Graph Send API working
+- n8n → backend image URL forwarding working for Messenger image attachments
 - PostgreSQL container running
 - `chat_messages` table exists
 - `family_memory` table exists
@@ -188,8 +189,10 @@ Current backend status:
 
 - `/health` is available.
 - `/message` validates requests.
+- `/message` accepts text, up to 3 image URLs, or both.
 - `/message` saves user and assistant chat rows when `DATABASE_URL` is configured and the schema exists.
 - `/message` extracts memories and generates replies with OpenAI when `OPENAI_API_KEY` is configured.
+- `/message` can download image URLs and pass them to OpenAI for visual understanding.
 - `/message` returns a safe fallback reply when OpenAI is not configured or fails.
 
 Local PostgreSQL uses host port `55432` to avoid conflicts with other Postgres installations on the default `5432` port.

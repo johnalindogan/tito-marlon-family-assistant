@@ -1,7 +1,10 @@
+import base64
 import json
 import logging
 from functools import lru_cache
 from typing import Any
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 
 from openai import OpenAI
 
@@ -10,6 +13,7 @@ from app.prompts import FALLBACK_REPLY, MEMORY_EXTRACTION_PROMPT, SYSTEM_PROMPT,
 from app.schemas import MemorySaved
 
 logger = logging.getLogger(__name__)
+MAX_IMAGE_BYTES = 7_000_000
 
 
 @lru_cache
@@ -47,6 +51,7 @@ def extract_memories(message: str) -> list[MemorySaved]:
 def generate_reply(
     sender_id: str,
     message: str,
+    image_urls: list[str],
     recent_chat: list[dict[str, str]],
     memory: dict[str, str],
 ) -> str:
@@ -60,12 +65,12 @@ def generate_reply(
         f"Saved family memory:\n{format_memory(memory)}"
     )
 
-    messages: list[dict[str, str]] = [
+    messages: list[dict[str, Any]] = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "system", "content": context},
     ]
     messages.extend(_chat_history_messages(recent_chat))
-    messages.append({"role": "user", "content": message})
+    messages.append({"role": "user", "content": _user_content(message, image_urls)})
 
     try:
         response = client.chat.completions.create(
@@ -75,8 +80,8 @@ def generate_reply(
         )
         reply = (response.choices[0].message.content or "").strip()
         return reply or FALLBACK_REPLY
-    except Exception:
-        logger.exception("Reply generation failed")
+    except Exception as exc:
+        logger.error("Reply generation failed: %s", exc.__class__.__name__)
         return FALLBACK_REPLY
 
 
@@ -112,3 +117,45 @@ def _chat_history_messages(recent_chat: list[dict[str, str]]) -> list[dict[str, 
         if content:
             messages.append({"role": role, "content": content})
     return messages[-20:]
+
+
+def _user_content(message: str, image_urls: list[str]) -> str | list[dict[str, Any]]:
+    if not image_urls:
+        return message
+
+    content: list[dict[str, Any]] = [
+        {
+            "type": "text",
+            "text": message or "Please look at this photo and help the family member.",
+        }
+    ]
+    for image_url in image_urls[:3]:
+        openai_image_url = _download_image_data_url(image_url) or image_url
+        content.append(
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": openai_image_url,
+                },
+            }
+        )
+    return content
+
+
+def _download_image_data_url(image_url: str) -> str | None:
+    request = Request(image_url, headers={"User-Agent": "TitoMarlonFamilyAssistant/1.0"})
+    try:
+        with urlopen(request, timeout=10) as response:
+            content_type = response.headers.get_content_type()
+            if not content_type.startswith("image/"):
+                return None
+            image_bytes = response.read(MAX_IMAGE_BYTES + 1)
+    except (OSError, URLError, ValueError):
+        return None
+
+    if len(image_bytes) > MAX_IMAGE_BYTES:
+        logger.warning("Image skipped because it is larger than %s bytes", MAX_IMAGE_BYTES)
+        return None
+
+    encoded = base64.b64encode(image_bytes).decode("ascii")
+    return f"data:{content_type};base64,{encoded}"
