@@ -180,3 +180,14 @@ def test_messenger_profile_rejects_invalid_profile_pic() -> None:
     )
 
     assert response.status_code == 422
+
+
+def test_outbound_image_reply_does_not_claim_images_are_impossible() -> None:
+    from app.service import _align_reply_with_outbound_images
+
+    reply = _align_reply_with_outbound_images(
+        "Pasensya po, hindi po ako makapag-send ng images dito."
+    )
+
+    assert "hindi po ako makapag-send" not in reply.lower()
+    assert "sample photos" in reply

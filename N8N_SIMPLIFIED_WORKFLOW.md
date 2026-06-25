@@ -112,6 +112,25 @@ The outbound image condition should check:
 {{ String(($('Tito Marlon Backend').item.json.outbound_image_urls || []).length > 0) }}
 ```
 
+Send each outbound image as a real Messenger image attachment, not as a generic card:
+
+```json
+{
+  "recipient": {
+    "id": "{{ $('Webhook').item.json.body.entry[0].messaging[0].sender.id }}"
+  },
+  "message": {
+    "attachment": {
+      "type": "image",
+      "payload": {
+        "url": "{{ $('Tito Marlon Backend').item.json.outbound_image_urls[0] }}",
+        "is_reusable": true
+      }
+    }
+  }
+}
+```
+
 ## Important
 
 The Facebook Page Access Token must stay in n8n credentials or environment variables, not in GitHub.

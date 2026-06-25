@@ -66,6 +66,9 @@ def process_message(payload: MessageRequest) -> MessageResponse:
         if session is not None:
             database.save_chat_message(session, payload.sender_id, "assistant", reply)
 
+    if outbound_image_urls:
+        reply = _align_reply_with_outbound_images(reply)
+
     return MessageResponse(
         reply=reply,
         memories_saved=memories_saved,
@@ -79,3 +82,21 @@ def process_message(payload: MessageRequest) -> MessageResponse:
             else None
         ),
     )
+
+
+def _align_reply_with_outbound_images(reply: str) -> str:
+    lowered = reply.lower()
+    cannot_send_phrases = (
+        "hindi ako makapag-send",
+        "hindi po ako makapag-send",
+        "hindi pa kaya",
+        "cannot send",
+        "can't send",
+    )
+    if any(phrase in lowered for phrase in cannot_send_phrases):
+        return "Sige po, magpapadala ako ng ilang sample photos sa baba para may idea kayo."
+
+    if "image" in lowered or "photo" in lowered or "larawan" in lowered:
+        return reply
+
+    return f"{reply}\n\nMagpapadala rin ako ng ilang sample photos sa baba para mas madaling makita."
