@@ -134,3 +134,62 @@ http://host.docker.internal:8000/message
 ```
 
 Later optionally expose via Cloudflare only if needed.
+
+## Backend Quick Start
+
+Create a local environment file:
+
+```bash
+copy .env.example .env
+```
+
+Install dependencies:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Start local PostgreSQL:
+
+```bash
+python scripts/setup_local_env.py
+docker compose -f docker-compose.postgres.yml up -d
+docker cp DATABASE_SCHEMA.sql titomarlon-postgres:/tmp/DATABASE_SCHEMA.sql
+docker exec titomarlon-postgres psql -U titomarlon -d titomarlon -f /tmp/DATABASE_SCHEMA.sql
+python scripts/reset_local_postgres_password.py
+python scripts/database_smoke_test.py
+```
+
+Run the API:
+
+```bash
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Check health:
+
+```bash
+curl http://localhost:8000/health
+```
+
+Send a test message:
+
+```bash
+python scripts/smoke_test.py
+```
+
+Run an explicit OpenAI-backed smoke test:
+
+```bash
+python scripts/openai_smoke_test.py
+```
+
+Current backend status:
+
+- `/health` is available.
+- `/message` validates requests.
+- `/message` saves user and assistant chat rows when `DATABASE_URL` is configured and the schema exists.
+- `/message` extracts memories and generates replies with OpenAI when `OPENAI_API_KEY` is configured.
+- `/message` returns a safe fallback reply when OpenAI is not configured or fails.
+
+Local PostgreSQL uses host port `55432` to avoid conflicts with other Postgres installations on the default `5432` port.

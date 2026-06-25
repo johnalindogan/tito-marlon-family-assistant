@@ -2,37 +2,37 @@
 
 ## Phase A — Backend Skeleton
 
-- [ ] Create FastAPI project
-- [ ] Add `/health`
-- [ ] Add `/message`
-- [ ] Add `.env.example`
-- [ ] Add Dockerfile
-- [ ] Add README
+- [x] Create FastAPI project
+- [x] Add `/health`
+- [x] Add `/message`
+- [x] Add `.env.example`
+- [x] Add Dockerfile
+- [x] Add README
 
 ## Phase B — Database
 
-- [ ] Connect to PostgreSQL
-- [ ] Implement `save_chat_message(sender_id, role, message)`
-- [ ] Implement `load_recent_chat(sender_id, limit=20)`
-- [ ] Implement `load_memory(sender_id)`
-- [ ] Implement `upsert_memory(sender_id, memory_key, memory_value)`
+- [x] Connect to PostgreSQL
+- [x] Implement `save_chat_message(sender_id, role, message)`
+- [x] Implement `load_recent_chat(sender_id, limit=20)`
+- [x] Implement `load_memory(sender_id)`
+- [x] Implement `upsert_memory(sender_id, memory_key, memory_value)`
 
 ## Phase C — OpenAI
 
-- [ ] Implement memory extraction call
-- [ ] Parse strict JSON safely
-- [ ] Implement reply generation call
-- [ ] Add Filipino/Taglish-friendly system prompt
+- [x] Implement memory extraction call
+- [x] Parse strict JSON safely
+- [x] Implement reply generation call
+- [x] Add Filipino/Taglish-friendly system prompt
 
 ## Phase D — End-to-End
 
-- [ ] `/message` saves user message
-- [ ] `/message` extracts memory
-- [ ] `/message` upserts memory
-- [ ] `/message` loads memory
-- [ ] `/message` generates reply
-- [ ] `/message` saves assistant reply
-- [ ] `/message` returns reply
+- [x] `/message` saves user message
+- [x] `/message` extracts memory
+- [x] `/message` upserts memory
+- [x] `/message` loads memory
+- [x] `/message` generates reply
+- [x] `/message` saves assistant reply
+- [x] `/message` returns reply
 
 ## Phase E — n8n Simplification
 
@@ -41,10 +41,19 @@
 - [ ] Keep Facebook Send API node
 - [ ] Test Messenger E2E
 
+## Local Verification
+
+- [x] Commit and push backend skeleton
+- [x] Configure local OpenAI API key in ignored `.env`
+- [x] Start local PostgreSQL with Docker
+- [x] Apply database schema
+- [x] Verify SQLAlchemy database connection
+- [x] Verify OpenAI + PostgreSQL smoke test
+
 ## Phase F — Safety
 
-- [ ] Never log secrets
-- [ ] Add basic request validation
-- [ ] Add max message length
-- [ ] Add fallback reply if OpenAI fails
-- [ ] Add scam/OTP safety instruction in system prompt
+- [x] Never log secrets
+- [x] Add basic request validation
+- [x] Add max message length
+- [x] Add fallback reply if OpenAI fails
+- [x] Add scam/OTP safety instruction in system prompt
